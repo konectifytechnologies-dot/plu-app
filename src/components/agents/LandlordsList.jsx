@@ -61,7 +61,6 @@ export default function LandlordList(){
                                             </button>
                                         </DialogTrigger>
                                     <DialogPopup className="sm:max-w-sm">
-                                        
                                         <DialogHeader>
                                             <DialogTitle className="font-mono">Edit Landlord</DialogTitle>
                                             <DialogDescription className="font-sans text-muted-foreground">Edit Landlord details</DialogDescription>

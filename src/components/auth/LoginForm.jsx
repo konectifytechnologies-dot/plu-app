@@ -1,14 +1,16 @@
 'use client'
-import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { IconArrowRight, IconEye, IconEyeOff, IconLock, IconMail } from '@tabler/icons-react';
 import { Label } from "../ui/label";
 import { useState } from "react";
-import { loginRequest } from "@/app/actions/authActions";
-import { useSetState } from "@mantine/hooks";
 import { signIn } from "next-auth/react"
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { AlertCircleIcon } from "lucide-react"
+import Submitbtn from "../ui/submitbtn";
+import { useRouter } from 'next/navigation'
 
 async function handleLogin(values, url) {
   try {
@@ -16,7 +18,7 @@ async function handleLogin(values, url) {
       redirect: false,
       login: values.login,
       password: values.password,
-      callbackUrl: '/dashboard'
+      callbackUrl: url
     })
     return status
   } catch (error) {
@@ -25,9 +27,13 @@ async function handleLogin(values, url) {
 }
 
 export function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams()
+  const role = searchParams.get('role');
   const [isVisible, setIsVisible] = useState(false);
-  const [params, setParams] = useSetState({ login: '', password: '' })
+  const [error, setError] = useState(null);
   const toggleVisibility = () => setIsVisible((prevState) => !prevState);
+  const url = `/account/${role}`;
 
 
   const { register, control, reset, handleSubmit, formState } = useForm({
@@ -39,16 +45,15 @@ export function LoginForm() {
   })
 
   const { mutateAsync: loginMutation, isPending, isError } = useMutation({
-    mutationFn: (data) => handleLogin(data, null),
+    mutationFn: (data) => handleLogin(data, url),
     onSuccess: (data) => {
       console.log(data);
-      /*if(data.error){
-         setError(data.error)
-      }else{
-          console.log(data);
-          router.push(data.url)
-          setTab(null)
-      }*/
+      if (data.error) {
+        setError(data.error)
+      } else {
+        console.log(data);
+        router.push(data.url)
+      }
       //setTab(null)
       //router.refresh();*/
     }
@@ -58,6 +63,13 @@ export function LoginForm() {
 
   return (
     <>
+      {error && (
+        <Alert variant="destructive" className="max-w-md">
+          <AlertCircleIcon />
+          <AlertTitle>Login failed</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       <form action="#" onSubmit={handleSubmit(loginMutation)} className="space-y-6">
         <div>
           <Label htmlFor="number" className="font-sans">Phone Number or Email Address</Label>
@@ -107,10 +119,7 @@ export function LoginForm() {
             </button>
           </div>
         </div>
-        <Button type="submit" className="w-full font-sans">
-          Sign in
-          <IconArrowRight className="h-4 w-4" />
-        </Button>
+        <Submitbtn text="Login" type="submit" fullwidth={true} loading={isPending} />
       </form>
     </>
   )

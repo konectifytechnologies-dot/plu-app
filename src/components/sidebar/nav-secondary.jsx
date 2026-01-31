@@ -28,10 +28,12 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export function NavDocuments() {
   const { isMobile } = useSidebar();
-  const {role} = useParams();
+  const { role } = useParams();
+  const { data: session, status } = useSession();
   const links = [
     {
       name: "Payments",
@@ -46,7 +48,7 @@ export function NavDocuments() {
     {
       name: 'Utilities',
       url: `/account/${role}/utilities`,
-      icon:IconRippleDown
+      icon: IconRippleDown
     }
   ]
   return (
@@ -65,11 +67,11 @@ export function NavDocuments() {
         ))}
 
         <SidebarMenuItem>
-            <SidebarMenuButton onClick={()=>signOut({ callbackUrl: 'http://localhost:3000/auth/login' })}>
-              <LogOut />
-              Log-out
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <SidebarMenuButton onClick={() => signOut({ callbackUrl: `http://localhost:3000/auth/login?role=${session?.role}` })}>
+            <LogOut />
+            Log-out
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
   )
